@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Location</title>
+</head>
+<body>
+    <div id="status"></div>
+    <script>
+        // ฟังก์ชันเพื่อดึงพิกัด GPS
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(sendLocation);
+            } else {
+                document.getElementById("status").innerText = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        // ฟังก์ชันเพื่อส่งพิกัดไปยังเซิร์ฟเวอร์
+        function sendLocation(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            // ฟังก์ชันคำนวณระยะห่างระหว่างสองจุด (Haversine Formula)
+            function haversine(lat1, lon1, lat2, lon2) {
+                const earthRadius = 6371; // รัศมีโลก (กิโลเมตร)
+
+                const dLat = deg2rad(lat2 - lat1);
+                const dLon = deg2rad(lon2 - lon1);
+
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+                return earthRadius * c; // ระยะห่าง (กิโลเมตร)
+            }
+
+            function deg2rad(deg) {
+                return deg * (Math.PI / 180);
+            }
+
+            const companyLatitude = 13.9083903;
+            const companyLongitude = 100.506024520;
+            const radius = 0.05;
+
+            const distance = haversine(companyLatitude, companyLongitude, latitude, longitude);
+
+            if (distance <= radius) {
+                document.getElementById("status").innerText = 'คุณอยู่ในพื้นที่บริษัท';
+            } else {
+                document.getElementById("status").innerText = 'คุณอยู่นอกพื้นที่บริษัท';
+            }
+        }
+        // เรียกใช้ฟังก์ชันเพื่อดึงพิกัดเมื่อโหลดหน้า
+        getLocation();
+    </script>
+</body>
+</html>
